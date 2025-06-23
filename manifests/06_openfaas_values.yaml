@@ -1,0 +1,8 @@
+basic_auth: true
+generateBasicAuth: true
+functionNamespace: openfaas-fn
+gateway:
+  replicas: 1
+  upstreamTimeout: 120s
+  readTimeout: 60s
+  writeTimeout: 60s
