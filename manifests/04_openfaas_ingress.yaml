@@ -18,5 +18,3 @@ spec:
                 name: gateway
                 port:
                   number: 8080
-# N’oublie pas d’ajouter dans ton /etc/hosts :
-#127.0.0.1 openfaas.local

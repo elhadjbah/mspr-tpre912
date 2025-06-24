@@ -9,4 +9,3 @@ spec:
     app: postgres
   ports:
     - port: 5432
-# postgres-0.postgres.postgres.svc.cluster.local
