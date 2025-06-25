@@ -1,0 +1,35 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+functions:
+  generate_password:
+    lang: python3
+    handler: ./generate_password
+    image: <dockerhub_username>/generate_password:latest
+    environment:
+      POSTGRES_HOST: postgres.cofrap.svc.cluster.local
+      POSTGRES_DB: cofrap
+      POSTGRES_USER: cofrap_user
+      POSTGRES_PASSWORD: secure_pass
+      ENCRYPT_KEY: <clé_fernet_base64>
+  generate_2fa:
+    lang: python3
+    handler: ./generate_2fa
+    image: <dockerhub_username>/generate_2fa:latest
+    environment:
+      POSTGRES_HOST: postgres.cofrap.svc.cluster.local
+      POSTGRES_DB: cofrap
+      POSTGRES_USER: cofrap_user
+      POSTGRES_PASSWORD: secure_pass
+      ENCRYPT_KEY: <clé_fernet_base64>
+  authenticate_user:
+    lang: python3
+    handler: ./authenticate_user
+    image: <dockerhub_username>/authenticate_user:latest
+    environment:
+      POSTGRES_HOST: postgres.cofrap.svc.cluster.local
+      POSTGRES_DB: cofrap
+      POSTGRES_USER: cofrap_user
+      POSTGRES_PASSWORD: secure_pass
+      ENCRYPT_KEY: <clé_fernet_base64> 
