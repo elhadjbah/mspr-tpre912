@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-script
+  namespace: cofrap
+data:
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        mfa VARCHAR(255) NOT NULL,
+        gendate TIMESTAMP NOT NULL,
+        expired BOOLEAN NOT NULL DEFAULT FALSE
+    ); 
