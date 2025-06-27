@@ -6,5 +6,8 @@ functions:
   pass-gen:
     lang: python3-http
     handler: ./pass-gen
-    image: jixjocelyn/password-generator:0.0.2
+    image: jixjocelyn/pass-gen:0.0.3
+    environment:
+      PYTHONUNBUFFERED: "1"
+      DATABASE_URL: "postgresql://neondb_owner:npg_fnFebDpY7zr4@ep-snowy-mud-a9jgtwmg-pooler.gwc.azure.neon.tech/neondb?sslmode=require&channel_binding=require"
 

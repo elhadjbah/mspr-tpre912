@@ -1,7 +1,5 @@
 import os
 from typing import Optional, List
-from sqlmodel import SQLModel, Field, create_engine, Session, select
-import json
 import qrcode
 import base64
 import hashlib
@@ -9,10 +7,16 @@ from io import BytesIO
 from datetime import datetime, timedelta
 from uuid import uuid4
 from cryptography.fernet import Fernet
+import json
+from sqlmodel import SQLModel, Field, create_engine, Session, select
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 
-class User(SQLModel, table=False):
-    __tablename__ = "users"  # Match your existing table name
+
+class User(SQLModel, table=True):
+    __tablename__ = "users"
 
     id: Optional[int] = Field(default=None, primary_key=True)
     username : str
@@ -23,21 +27,13 @@ class User(SQLModel, table=False):
 
 
 # Database configuration for serverless
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://cofrap:cofrap123@localhost/cofrap")
+PGSQL_URL = "postgresql://neondb_owner:npg_fnFebDpY7zr4@ep-snowy-mud-a9jgtwmg-pooler.gwc.azure.neon.tech/neondb?sslmode=require&channel_binding=require"
+DATABASE_URL = os.getenv("DATABASE_URL", PGSQL_URL)
+logging.debug(f"\nDATABASE_URL : {DATABASE_URL}")
 
 # Connection pool settings optimized for serverless
 engine = create_engine(
-    DATABASE_URL,
-    pool_size=1,  # Small pool for serverless
-    max_overflow=0,  # No overflow connections
-    pool_pre_ping=True,  # Validate connections
-    pool_recycle=300,  # Recycle connections every 5 minutes
-    connect_args={
-        "connect_timeout": 10,
-        "server_settings": {
-            "application_name": "password_generator",
-        }
-    }
+    DATABASE_URL
 )
 
 
@@ -46,12 +42,20 @@ def get_session():
     return Session(engine)
 
 
-def get_all_users(limit: int = 10) -> List[User]:
+def update_user_infos(username: str, encrypted_password: str, gendate):
     """Get all users with limit"""
     with get_session() as session:
-        statement = session.query(User()).limit(limit)
-        results = session.exec(statement).all()
-        return results
+        stmt = select(User).where(User.username == username)
+        existing_user = session.exec(stmt).first()
+        logging.debug(f"\nexisting_user : {existing_user}")
+        if existing_user is not None:
+            existing_user.password = encrypted_password
+            existing_user.gendate = gendate
+            existing_user.expired = False
+            session.commit()
+            session.refresh(existing_user)
+            return existing_user.id
+    return None
 
 class DatabaseManager:
     """Singleton database manager for serverless environments"""
@@ -96,26 +100,21 @@ def generate_strong_password():
     return base64.urlsafe_b64encode(sha)[:24].decode()
 
 def insert_user(username, encrypted_password, gendate):
-    with get_session() as session:
-        user = User()
-        user.username = username
-        user.password = encrypted_password
-        user.gendate = gendate
-        session.add(user)
-        session.commit()
-        return user.id
+    user_id = update_user_infos(username, encrypted_password, gendate)
+    if user_id is None:
+        with get_session() as session:
+            user = User(
+                username= username,
+                password= encrypted_password,
+                gendate = gendate,
+                mfa= ""
+            )
+            session.add(user)
+            session.commit()
+            return user.id
 def create_user(event, context):
     try:
-        try:
-            body = event.body
-            bodyJson = json.loads(body)
-            print(bodyJson)
-
-        except Exception as e:
-            return {
-                "statusCode": 400,
-                "body": {"error": f"Requête JSON invalide {body}" }
-            }
+        bodyJson = json.loads(event.body)
 
         username = bodyJson.get("username")
 
@@ -137,10 +136,7 @@ def create_user(event, context):
         buffer = BytesIO()
         img.save(buffer, format="PNG")
         img_base64 = base64.b64encode(buffer.getvalue()).decode()
-
-        return {
-            "statusCode": 200,
-            "body": {
+        response = {
                 "success": True,
                 "userId": user_id,
                 "password": password,
@@ -148,22 +144,25 @@ def create_user(event, context):
                 "encryptedPassword": encrypted_pw,
                 "expiresAt": now + timedelta(days=180),
                 "message": "Mot de passe généré avec succès"
-            },
-            "headers": {
-                "Content-Type": "application/json"
             }
+
+        return {
+            "statusCode": 200,
+            "body": response
         }
 
     except Exception as e:
+        logging.debug(f"\n### ERROR : \n{e}")
         return {
             "statusCode": 500,
             "body": {"error": str(e)}
         }
 
-
 def handle(event, context):
     try:
-        return create_user(event, context)
+        response = create_user(event, context)
+        return response
+
     except Exception as e:
         return {
             "statusCode": 500,
