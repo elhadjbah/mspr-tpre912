@@ -112,6 +112,8 @@ def insert_user(username, encrypted_password, gendate):
             session.add(user)
             session.commit()
             return user.id
+    else:
+        return user_id
 def create_user(event, context):
     try:
         bodyJson = json.loads(event.body)
