@@ -38,5 +38,34 @@ kubectl get nodes -o wide
 # Vérifier que la table a été créée
 echo ""
 echo "Vérification de la table users:"
-POD_NAME=$(kubectl get pods -l app=postgres -o jsonpath='{.items[0].metadata.name}')
-kubectl exec $POD_NAME -n cofrap -- psql -U cofrap -d cofrap -c "SELECT * FROM users;" 
+# Attendre un peu pour que PostgreSQL soit complètement initialisé
+sleep 10
+
+# Utiliser le nom de pod StatefulSet
+POD_NAME="postgres-0"
+if kubectl get pod $POD_NAME -n cofrap >/dev/null 2>&1; then
+    echo "Pod trouvé: $POD_NAME"
+    # Vérifier que le pod est prêt
+    READY=$(kubectl get pod $POD_NAME -n cofrap -o jsonpath='{.status.containerStatuses[0].ready}' 2>/dev/null)
+    if [ "$READY" = "true" ]; then
+        echo "Pod est prêt. Test de connexion à la base de données..."
+        kubectl exec $POD_NAME -n cofrap -- psql -U cofrap -d cofrap -c "SELECT * FROM users;" 2>/dev/null
+        if [ $? -eq 0 ]; then
+            echo "✅ Vérification de la table users réussie!"
+        else
+            echo "⚠️  La table users n'est pas encore disponible ou erreur de connexion"
+        fi
+    else
+        echo "⚠️  Pod n'est pas encore prêt"
+    fi
+else
+    echo "⚠️  Pod $POD_NAME non trouvé, recherche d'un autre pod..."
+    # Fallback: chercher n'importe quel pod avec le label app=postgres
+    POD_NAME=$(kubectl get pods -l app=postgres -n cofrap -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+    if [ -n "$POD_NAME" ]; then
+        echo "Pod trouvé: $POD_NAME"
+        kubectl exec $POD_NAME -n cofrap -- psql -U cofrap -d cofrap -c "SELECT * FROM users;" 2>/dev/null
+    else
+        echo "❌ Aucun pod PostgreSQL trouvé"
+    fi
+fi 
