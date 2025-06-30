@@ -6,7 +6,7 @@ functions:
   generate_password:
     lang: python3
     handler: ./generate_password
-    image: <dockerhub_username>/generate_password:latest
+    image: elhadjdocker1/generate_password:latest
     environment:
       POSTGRES_HOST: postgres.cofrap.svc.cluster.local
       POSTGRES_DB: cofrap
@@ -16,7 +16,7 @@ functions:
   generate_2fa:
     lang: python3
     handler: ./generate_2fa
-    image: <dockerhub_username>/generate_2fa:latest
+    image: elhadjdocker1/generate_2fa:latest
     environment:
       POSTGRES_HOST: postgres.cofrap.svc.cluster.local
       POSTGRES_DB: cofrap
@@ -26,7 +26,7 @@ functions:
   authenticate_user:
     lang: python3
     handler: ./authenticate_user
-    image: <dockerhub_username>/authenticate_user:latest
+    image: elhadjdocker1/authenticate_user:latest
     environment:
       POSTGRES_HOST: postgres.cofrap.svc.cluster.local
       POSTGRES_DB: cofrap

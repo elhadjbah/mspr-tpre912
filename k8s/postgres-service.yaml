@@ -1,12 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres
+  name: postgres-service
   namespace: cofrap
 spec:
-  ports:
-    - port: 5432
-      targetPort: 5432
+  type: NodePort
   selector:
     app: postgres
-  clusterIP: None 
+  ports:
+  - port: 5432
+    targetPort: 5432
+    nodePort: 30002
+    name: postgres 

@@ -5,13 +5,10 @@ metadata:
   namespace: cofrap
 data:
   init.sql: |
-    -- La base de données et l'utilisateur sont créés automatiquement par les variables d'environnement
-    -- POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
+    -- Script d'initialisation automatique de PostgreSQL
+    -- Ce script sera exécuté lors du premier démarrage du conteneur
     
-    -- Se connecter à la base de données créée automatiquement
-    \connect cofrap;
-
-    -- Créer la table users
+    -- Création de la table users
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(255) UNIQUE NOT NULL,
@@ -20,8 +17,12 @@ data:
         gendate TIMESTAMP NOT NULL,
         expired BOOLEAN NOT NULL DEFAULT FALSE
     );
-
-    -- Insérer un utilisateur de test
+    
+    -- Insertion de l'utilisateur admin par défaut
     INSERT INTO users (username, password, mfa, gendate, expired)
     VALUES ('admin', 'admin_pass', 'off', NOW(), false)
     ON CONFLICT (username) DO NOTHING;
+    
+    -- Vérification
+    SELECT 'Table users créée avec succès!' as message;
+    SELECT COUNT(*) as nombre_utilisateurs FROM users; 

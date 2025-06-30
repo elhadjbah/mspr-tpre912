@@ -1,17 +1,17 @@
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-openfaas-to-postgres
-  namespace: cofrap
-spec:
-  podSelector:
-    matchLabels:
-      app: postgres
-  ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: openfaas-fn
-      ports:
-        - protocol: TCP
-          port: 5432 
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: allow-openfaas-to-postgres
+#   namespace: cofrap
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: postgres
+#   ingress:
+#     - from:
+#         - namespaceSelector:
+#             matchLabels:
+#               kubernetes.io/metadata.name: openfaas-fn
+#       ports:
+#         - protocol: TCP
+#           port: 5432 

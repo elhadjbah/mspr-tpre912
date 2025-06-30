@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-loadbalancer
+  labels:
+    app: postgres
+  annotations:
+    # Annotations de sécurité pour le LoadBalancer
+    service.beta.kubernetes.io/aws-load-balancer-source-ranges: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+    service.beta.kubernetes.io/aws-load-balancer-additional-security-groups: "sg-xxxxxxxxx"
+    # Pour d'autres providers cloud
+    cloud.google.com/load-balancer-source-ranges: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  selector:
+    app: postgres 

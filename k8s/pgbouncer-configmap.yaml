@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgbouncer-config
+data:
+  pgbouncer.ini: |
+    [databases]
+    * = host=postgres port=5432 dbname=cofrap
+    
+    [pgbouncer]
+    listen_addr = 0.0.0.0
+    listen_port = 5432
+    auth_type = md5
+    auth_file = /etc/pgbouncer/userlist.txt
+    pool_mode = transaction
+    max_client_conn = 100
+    default_pool_size = 20
+    max_db_connections = 50
+    max_user_connections = 50
+    server_reset_query = DISCARD ALL
+    server_check_query = select 1
+    server_check_delay = 30
+    idle_transaction_timeout = 0
+    client_tls_sslmode = require
+    client_tls_cert_file = /etc/pgbouncer/client.crt
+    client_tls_key_file = /etc/pgbouncer/client.key
+    client_tls_ca_file = /etc/pgbouncer/ca.crt
+    
+    [log]
+    syslog = 0
+    logfile = /var/log/pgbouncer/pgbouncer.log
+    verbosity = 2
+    
+  userlist.txt: |
+    "postgres" "md5password"
+    "admin" "md5password" 
