@@ -1,5 +1,5 @@
 import os
-from typing import Optional, List
+from typing import Optional
 import qrcode
 import base64
 import hashlib
@@ -27,7 +27,7 @@ class User(SQLModel, table=True):
 
 
 # Database configuration for serverless
-PGSQL_URL = "postgresql://neondb_owner:npg_fnFebDpY7zr4@ep-snowy-mud-a9jgtwmg-pooler.gwc.azure.neon.tech/neondb?sslmode=require&channel_binding=require"
+PGSQL_URL = ""
 DATABASE_URL = os.getenv("DATABASE_URL", PGSQL_URL)
 logging.debug(f"\nDATABASE_URL : {DATABASE_URL}")
 
