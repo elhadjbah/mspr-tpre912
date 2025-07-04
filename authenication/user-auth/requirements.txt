@@ -1,0 +1,7 @@
+# Main dependencies
+sqlmodel==0.0.14
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23
+qrcode>=7.4.2
+cryptography>=42.0.0
+onetimepass

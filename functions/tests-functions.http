@@ -1,0 +1,17 @@
+
+POST http://127.0.0.1:7001/
+Content-Type: application/json
+
+{
+  "username": "jocelyn"
+}
+
+###
+
+POST http://localhost:8080/function/pass-gen
+Content-Type: application/json
+
+{
+  "username": "jocelyn"
+}
+

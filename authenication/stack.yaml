@@ -1,0 +1,10 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+functions:
+  user-auth:
+    lang: python3-http
+    handler: ./user-auth
+    image: jixjocelyn/user-auth:1.0.0
+
