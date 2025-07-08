@@ -10,6 +10,9 @@ kubectl delete pvc postgres-storage-postgres-0 -n cofrap --ignore-not-found=true
 kubectl delete pv postgres-pv --ignore-not-found=true
 kubectl delete configmap postgres-init-script -n cofrap --ignore-not-found=true
 kubectl delete secret postgres-secrets -n cofrap --ignore-not-found=true
+kubectl delete deployment frontend -n cofrap --ignore-not-found=true
+kubectl delete service frontend-service -n cofrap --ignore-not-found=true
+kubectl delete ingress frontend-ingress -n cofrap --ignore-not-found=true
 
 # Attendre que tout soit supprimé
 echo "Attente de la suppression..."
