@@ -9,6 +9,9 @@
 6. Accès à l'application
 7. Utilisation d'un Ingress
 7bis. Utilisation d'un nom de domaine personnalisé
+7ter. Activer HTTPS avec cert-manager et Let's Encrypt
+7quater. Exposer plusieurs domaines (multi-domaines)
+7quinquies. Forcer la redirection HTTP vers HTTPS (NGINX Ingress)
 8. Dépannage
 9. FAQ
 
@@ -110,6 +113,82 @@ kubectl apply -f frontend-ingress.yaml -n cofrap
 - Si vous utilisez HTTPS, configurez également un certificat TLS dans l'Ingress (voir documentation de votre Ingress Controller).
 - Assurez-vous que l'Ingress Controller est bien installé et fonctionne sur votre cluster.
 
+## 7ter. Activer HTTPS avec cert-manager et Let's Encrypt
+
+Pour sécuriser l'accès à votre frontend avec HTTPS automatiquement :
+
+1. **Installer cert-manager** sur votre cluster (voir https://cert-manager.io/docs/)
+2. **Créer un ClusterIssuer** pour Let's Encrypt (exemple dans la doc cert-manager)
+3. **Modifier le manifest Ingress** comme suit :
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  namespace: cofrap
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+    - hosts:
+        - monapp.mondomaine.com
+      secretName: frontend-tls
+  rules:
+    - host: monapp.mondomaine.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+```
+
+- Le certificat sera généré et renouvelé automatiquement.
+- Accédez ensuite à `https://monapp.mondomaine.com`
+
+## 7quater. Exposer plusieurs domaines (multi-domaines)
+
+Vous pouvez exposer le frontend sur plusieurs domaines en ajoutant plusieurs règles dans le même Ingress :
+
+```yaml
+spec:
+  rules:
+    - host: frontend1.mondomaine.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+    - host: frontend2.mondomaine.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+```
+
+## 7quinquies. Forcer la redirection HTTP vers HTTPS (NGINX Ingress)
+
+Pour forcer la redirection automatique de HTTP vers HTTPS, ajoutez l'annotation suivante dans le manifest Ingress :
+
+```yaml
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+```
+
 ## 8. Dépannage
 - Vérifiez que le pod frontend est prêt :
   ```bash
@@ -146,6 +225,13 @@ kubectl apply -f frontend-ingress.yaml -n cofrap
 > kubectl delete service frontend-service -n cofrap
 > kubectl delete ingress frontend-ingress -n cofrap
 > ```
+
+**Q : Comment déboguer un problème d'Ingress qui ne fonctionne pas ?**
+> - Vérifiez que l'Ingress Controller est bien déployé (`kubectl get pods -n ingress-nginx` ou namespace équivalent).
+> - Vérifiez les logs du contrôleur (`kubectl logs <pod-ingress-controller> -n ingress-nginx`).
+> - Vérifiez que le DNS ou le fichier hosts pointe bien vers l'IP du contrôleur.
+> - Vérifiez que le port 80 (et 443 si HTTPS) est ouvert sur le node.
+> - Vérifiez la syntaxe de votre manifest Ingress et la correspondance exacte du champ `host:`.
 
 ---
 
