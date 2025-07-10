@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/florent228/faas-frontend:master-848f02a
+          image: jixjocelyn/faas-fronted:1.0 #ghcr.io/florent228/faas-frontend:master-848f02a
           ports:
             - containerPort: 80 
