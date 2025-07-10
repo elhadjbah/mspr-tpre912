@@ -1,21 +1,40 @@
-# Déploiement du Frontend sur Kubernetes
+# Déploiement du Frontend
 
-## Sommaire
-1. Présentation
-2. Prérequis
-3. Fichiers fournis
-4. Déploiement du frontend
-5. Redéploiement du frontend
-6. Accès à l'application
-7. Utilisation d'un Ingress
-7bis. Utilisation d'un nom de domaine personnalisé
-7ter. Activer HTTPS avec cert-manager et Let's Encrypt
-7quater. Exposer plusieurs domaines (multi-domaines)
-7quinquies. Forcer la redirection HTTP vers HTTPS (NGINX Ingress)
-8. Dépannage
-9. FAQ
+## 🚦 PRÉREQUIS AVANT DÉPLOIEMENT
+
+Avant d’exécuter les scripts `deploy-frontend.sh` ou `redeploy-frontend.sh`, il est indispensable de suivre ces étapes :
+
+### 1. Démarrer Minikube
+```bash
+minikube start
+```
+
+### 2. Activer l’addon Ingress de Minikube
+```bash
+minikube addons enable ingress
+```
+
+### 3. Vérifier que l’Ingress Controller est bien lancé
+```bash
+kubectl get pods -n kube-system | grep ingress
+```
+- Le pod doit être en statut `Running`.
+- Si ce n’est pas le cas, patiente quelques instants et relance la commande.
+
+### 4. Ne pas utiliser `sudo` pour Minikube ou les scripts
+Utilisez simplement :
+```bash
+./deploy-frontend.sh
+# ou
+./redeploy-frontend.sh
+```
+N’utilisez `sudo` que pour éditer le fichier `/etc/hosts` si besoin.
 
 ---
+
+## Déploiement du frontend
+
+(Les instructions existantes suivent ici...)
 
 ## 1. Présentation
 Ce dossier contient tout le nécessaire pour déployer le frontend Dockerisé (`ghcr.io/florent228/faas-frontend:master-848f02a`) sur un cluster Kubernetes, dans le namespace `cofrap`. L'application est exposée à l'extérieur du cluster via un Service NodePort et un Ingress.
